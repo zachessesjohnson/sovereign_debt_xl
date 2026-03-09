@@ -3,3 +3,9 @@ from .indexing import *  # noqa: F401,F403
 from .forecasting import *  # noqa: F401,F403
 from .modeling import *  # noqa: F401,F403
 from .utils import *  # noqa: F401,F403
+from .fiscal import *  # noqa: F401,F403
+from .credit_risk import *  # noqa: F401,F403
+from .yield_curve import *  # noqa: F401,F403
+from .reserves import *  # noqa: F401,F403
+from .stress import *  # noqa: F401,F403
+from .amortization import *  # noqa: F401,F403
