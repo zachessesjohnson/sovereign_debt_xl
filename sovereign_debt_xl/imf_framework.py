@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-import statsmodels.api as sm
 from pyxll import xl_func
 from scipy.special import expit
 

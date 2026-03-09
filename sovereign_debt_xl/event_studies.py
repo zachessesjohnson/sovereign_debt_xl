@@ -3,11 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-import statsmodels.api as sm
 from pyxll import xl_func
-from scipy import stats
 
-from ._coerce import safe_err, to_1d_floats, to_2d_list
+from ._coerce import safe_err, to_1d_floats
 
 
 @xl_func(
