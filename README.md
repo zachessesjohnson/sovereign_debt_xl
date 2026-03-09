@@ -32,6 +32,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
    - [Event Studies & Early Warning](#event-studies--early-warning)
 5. [Error Handling](#error-handling)
 6. [Running the Tests](#running-the-tests)
+7. [Extracting sovereign\_debt\_py](#extracting-sovereign_debt_py)
 
 ---
 
@@ -1713,4 +1714,16 @@ python -m pytest
 ```
 
 All 154 tests should pass in under 5 seconds.
+
+---
+
+## Extracting sovereign\_debt\_py
+
+The `sovereign_debt_py/` subdirectory is a standalone pure-Python package (no
+PyXLL dependency) that mirrors the analytic functions in this library.  A
+step-by-step guide for moving it into its own GitHub repository — including
+options for preserving git history, updating imports, and updating CI — is
+available at:
+
+[`docs/extract-sovereign-debt-py.md`](docs/extract-sovereign-debt-py.md)
 
