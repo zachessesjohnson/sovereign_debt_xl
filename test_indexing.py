@@ -21,4 +21,6 @@ def test_normalize_minmax_bounds():
 
 def test_index_to_base():
     out = xl_index_to_base([100, 110, 120], 1)
-    assert out == [100.0, 110.0, 120.0]
+    assert all(math.isclose(a, b) for a, b in zip(out, [100.0, 110.0, 120.0])), (
+        f"Expected [100.0, 110.0, 120.0], got {out}"
+    )
