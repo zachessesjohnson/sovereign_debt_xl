@@ -86,7 +86,7 @@ def test_carry_rolldown_carry_positive():
 # Asset-swap spread
 # ---------------------------------------------------------------------------
 
-def test_asm_spread_par_near_zero():
+def test_asw_spread_par_near_zero():
     tenors = [1.0, 2.0, 3.0, 5.0]
     rates = [0.04, 0.04, 0.04, 0.04]
     # Compute the OIS fair value — the price at which ASW is exactly 0.
@@ -98,7 +98,7 @@ def test_asm_spread_par_near_zero():
     assert abs(asw) < 1e-5
 
 
-def test_asm_spread_premium_bond_negative():
+def test_asw_spread_premium_bond_negative():
     # Bond priced above par (investor pays more) → negative ASW
     tenors = [1.0, 3.0, 5.0]
     rates = [0.03, 0.03, 0.03]

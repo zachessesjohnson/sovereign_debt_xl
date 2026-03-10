@@ -13,6 +13,7 @@ dependencies = [
     "scipy",
     "statsmodels",
     "scikit-learn",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
@@ -21,6 +22,3 @@ dev = ["pytest"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["sovereign_debt_xl*"]
-
-[tool.pytest.ini_options]
-addopts = "--import-mode=importlib"
