@@ -32,7 +32,8 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
    - [Event Studies & Early Warning](#event-studies--early-warning)
 5. [Error Handling](#error-handling)
 6. [Running the Tests](#running-the-tests)
-7. [Extracting sovereign\_debt\_py](#extracting-sovereign_debt_py)
+7. [sovereign\_debt\_py plotting](#sovereign_debt_py-plotting)
+8. [Extracting sovereign\_debt\_py](#extracting-sovereign_debt_py)
 
 ---
 
@@ -1713,7 +1714,99 @@ pip install pytest
 python -m pytest
 ```
 
-All 154 tests should pass in under 5 seconds.
+All 184 tests should pass in under 5 seconds.
+
+---
+
+## sovereign\_debt\_py plotting
+
+`sovereign_debt_py` is a pure-Python analytics library (no PyXLL dependency)
+included in this repository.  Its `plotting` subpackage provides Matplotlib-
+based charting functions for all common sovereign-debt visualisations.
+
+### Quick start
+
+```python
+from sovereign_debt_py.plotting import (
+    plot_yield_curve,
+    plot_timeseries,
+    plot_rolling_average,
+    plot_spread,
+    plot_fan_chart,
+    fig_to_png_bytes,
+)
+```
+
+### Yield curve
+
+```python
+fig, ax = plot_yield_curve(
+    [1, 2, 5, 10],       # tenors (years)
+    [0.04, 0.045, 0.05, 0.052],  # yields (decimal)
+    title="Sovereign Yield Curve",
+    style="line+markers",   # "line" | "markers" | "line+markers"
+    as_percent=True,        # format y-axis as 4.00%, 4.50%, …
+)
+fig.show()
+```
+
+### Time series
+
+```python
+import datetime
+
+dates  = [datetime.date(2023, m, 1) for m in range(1, 13)]
+yields = [0.04 + 0.001 * m for m in range(12)]
+
+fig, ax = plot_timeseries(dates, yields, title="10Y Yield – 2023")
+```
+
+### Rolling average overlay
+
+```python
+fig, ax = plot_rolling_average(
+    dates, yields,
+    window=3,
+    base_label="Raw yield",
+    roll_label="3-month MA",
+)
+```
+
+### Spread chart
+
+```python
+em_yields = [0.06 + 0.001 * i for i in range(6)]
+us_yields = [0.04 + 0.001 * i for i in range(6)]
+
+fig, ax = plot_spread(
+    dates[:6], em_yields, us_yields,
+    label_a="EM", label_b="US",
+    spread_label="EM–US Spread",
+)
+```
+
+### DSA fan chart
+
+```python
+x    = list(range(2024, 2031))
+p50  = [60, 62, 64, 63, 61, 60, 59]
+
+bands = {
+    (0.10, 0.90): ([55] * 7, [70] * 7),
+    (0.25, 0.75): ([58] * 7, [66] * 7),
+}
+
+fig, ax = plot_fan_chart(x, p50, bands, title="Debt/GDP Fan Chart")
+```
+
+### Export to PNG bytes (for embedding / reports)
+
+```python
+png: bytes = fig_to_png_bytes(fig, width_px=800, height_px=450, dpi=120)
+# png starts with b'\x89PNG' and can be written to a file or embedded in Excel:
+with open("chart.png", "wb") as f:
+    f.write(png)
+```
 
 ---
 
