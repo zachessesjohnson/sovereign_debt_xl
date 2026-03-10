@@ -1,5 +1,4 @@
-from .averaging import *  # noqa: F401,F403
-from .indexing import *  # noqa: F401,F403
-from .forecasting import *  # noqa: F401,F403
-from .modeling import *  # noqa: F401,F403
-from .utils import *  # noqa: F401,F403
+# sovereign_debt_xl package
+# Functions are imported directly from their submodules.
+# For PyXLL auto-discovery, all submodules are listed in pyxll.cfg.
+
