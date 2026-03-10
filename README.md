@@ -49,6 +49,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
 | scipy | any recent |
 | statsmodels | any recent |
 | scikit-learn | any recent |
+| matplotlib | any recent |
 
 ---
 
@@ -56,7 +57,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
 
 ```bash
 # 1. Install Python dependencies
-pip install numpy pandas scipy statsmodels scikit-learn pyxll
+pip install numpy pandas scipy statsmodels scikit-learn matplotlib pyxll
 
 # 2. Install this package
 pip install -e .
@@ -1812,11 +1813,34 @@ with open("chart.png", "wb") as f:
 
 ## Extracting sovereign\_debt\_py
 
-The `sovereign_debt_py/` subdirectory is a standalone pure-Python package (no
-PyXLL dependency) that mirrors the analytic functions in this library.  A
-step-by-step guide for moving it into its own GitHub repository — including
-options for preserving git history, updating imports, and updating CI — is
-available at:
+`sovereign_debt_py` is a pure-Python package (no PyXLL / Excel dependency) that
+lives alongside the Excel add-in in this repo.  It currently exposes a
+`plotting` subpackage (see the [section above](#sovereign_debt_py-plotting)) and
+is designed to be usable from any Python environment — scripts, notebooks, web
+apps, and CI pipelines.
+
+If you want to move `sovereign_debt_py` into its own GitHub repository, a
+step-by-step guide covering git-subtree / git-filter-repo extraction, CI setup,
+and optional import-delegation back to `sovereign_debt_xl` is available at:
 
 [`docs/extract-sovereign-debt-py.md`](docs/extract-sovereign-debt-py.md)
+
+### Current layout
+
+```
+sovereign_debt_xl/              ← repo root
+├── sovereign_debt_py/          ← pure-Python package (no PyXLL)
+│   ├── __init__.py
+│   └── plotting/
+│       ├── __init__.py
+│       ├── core.py             ← validation helpers + fig_to_png_bytes
+│       ├── yield_curve.py      ← plot_yield_curve
+│       ├── timeseries.py       ← plot_timeseries / plot_rolling_average / plot_spread
+│       └── dsa.py              ← plot_fan_chart
+├── sovereign_debt_xl/          ← PyXLL / Excel add-in package
+│   └── *.py                    ← SOV_* Excel functions
+├── test_plotting.py            ← pytest suite for sovereign_debt_py
+├── pyproject.toml
+└── requirements.txt
+```
 

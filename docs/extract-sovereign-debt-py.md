@@ -1,40 +1,28 @@
 # Extracting `sovereign_debt_py` into its own repository
 
 `sovereign_debt_py` is a pure-Python library (no PyXLL / Excel dependency) that
-mirrors the analytic functions in this repository.  It currently lives in the
-subdirectory `sovereign_debt_py/` of `sovereign_debt_xl` and has its own
-`pyproject.toml`, making it easy to spin out into a standalone repo.
+lives at the root of the `sovereign_debt_xl` repository.  It currently provides
+a `plotting` subpackage for Matplotlib-based sovereign debt charts.
 
 ---
 
 ## Current layout inside `sovereign_debt_xl`
 
 ```
-sovereign_debt_xl/          ← repo root
-├── sovereign_debt_py/      ← sub-project root (owns its own pyproject.toml)
-│   ├── pyproject.toml      ← declares name = "sovereign-debt-py"
-│   └── sovereign_debt_py/  ← importable package
+sovereign_debt_xl/              ← repo root
+├── sovereign_debt_py/          ← importable pure-Python package
+│   ├── __init__.py
+│   └── plotting/
 │       ├── __init__.py
-│       ├── _coerce.py
-│       ├── averaging.py
-│       ├── amortization.py
-│       ├── contagion.py
-│       ├── credit_risk.py
-│       ├── debt_composition.py
-│       ├── event_studies.py
-│       ├── fiscal.py
-│       ├── forecasting.py
-│       ├── imf_framework.py
-│       ├── indexing.py
-│       ├── macro_financial.py
-│       ├── market_microstructure.py
-│       ├── modeling.py
-│       ├── political_esg.py
-│       ├── reserves.py
-│       ├── stress.py
-│       ├── utils.py
-│       └── yield_curve.py
-└── sovereign_debt_xl/      ← PyXLL / Excel add-in package (kept here)
+│       ├── core.py             ← validation helpers + fig_to_png_bytes
+│       ├── yield_curve.py      ← plot_yield_curve
+│       ├── timeseries.py       ← plot_timeseries / plot_rolling_average / plot_spread
+│       └── dsa.py              ← plot_fan_chart
+├── sovereign_debt_xl/          ← PyXLL / Excel add-in package
+│   └── *.py
+├── test_plotting.py            ← pytest suite for sovereign_debt_py
+├── pyproject.toml              ← single pyproject for both packages
+└── requirements.txt
 ```
 
 ---
@@ -129,17 +117,38 @@ git push -u origin main
 
 ---
 
-## After the extraction: updating `sovereign_debt_xl`
+## After the extraction: adding a `pyproject.toml`
 
-`sovereign_debt_xl` and `sovereign_debt_py` currently share **no import
-relationship** — the two packages are independent mirror implementations.
-If you later want `sovereign_debt_xl` to *delegate* its logic to
-`sovereign_debt_py` (recommended to reduce duplication), follow the steps
-below.
+Once extracted into its own repo, `sovereign_debt_py` will need its own
+`pyproject.toml`.  A minimal starting point:
 
-### 1. Declare `sovereign_debt_py` as a dependency
+```toml
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
 
-**Via GitHub (before a PyPI release)** — edit `sovereign_debt_xl/pyproject.toml`:
+[project]
+name = "sovereign-debt-py"
+version = "0.1.0"
+description = "Pure-Python sovereign debt analytics and plotting"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sovereign_debt_py*"]
+```
+
+### Declaring the dependency in `sovereign_debt_xl`
+
+**Via GitHub (before a PyPI release)** — edit `pyproject.toml` in `sovereign_debt_xl`:
 
 ```toml
 [project]
@@ -149,6 +158,7 @@ dependencies = [
     "scipy",
     "statsmodels",
     "scikit-learn",
+    "matplotlib",
     "sovereign-debt-py @ git+https://github.com/zachessesjohnson/sovereign_debt_py.git",
 ]
 ```
@@ -168,54 +178,6 @@ dependencies = [
 # From the sovereign_debt_xl repo root:
 git submodule add https://github.com/zachessesjohnson/sovereign_debt_py.git sovereign_debt_py
 git commit -m "Add sovereign_debt_py as a git submodule"
-```
-
-### 2. Update imports in `sovereign_debt_xl`
-
-Each module in `sovereign_debt_xl/` currently re-implements the logic directly.
-Once `sovereign_debt_py` is available as a dependency, you can simplify, for
-example in `sovereign_debt_xl/averaging.py`:
-
-```python
-# Before (logic lives here, decorated for Excel):
-from pyxll import xl_func
-from ._coerce import safe_err, to_1d_floats
-import numpy as np
-
-@xl_func(...)
-def xl_weighted_average(values, weights):
-    ...  # implementation
-
-# After (delegate to sovereign_debt_py, just add the Excel decorator):
-from pyxll import xl_func
-from sovereign_debt_py.averaging import xl_weighted_average
-
-@xl_func(...)
-def xl_weighted_average(values, weights):
-    return xl_weighted_average(values, weights)
-```
-
-> **Note on naming:** functions in `sovereign_debt_py` keep the `xl_` prefix so
-> that their public API matches what `sovereign_debt_xl` exposes to Excel — the
-> prefix is part of the shared interface, not an Excel-only convention.
-
-Repeat for every module.
-
-### 3. Remove the now-redundant `sovereign_debt_py/` subtree
-
-Once `sovereign_debt_xl` depends on the external package, remove the embedded
-copy:
-
-```bash
-# If you used git submodule:
-git submodule deinit -f sovereign_debt_py
-git rm -f sovereign_debt_py
-rm -rf .git/modules/sovereign_debt_py
-git commit -m "Remove embedded sovereign_debt_py (now an external dependency)"
-
-# If you did NOT use git submodule (simple deletion):
-git rm -r sovereign_debt_py/
-git commit -m "Remove embedded sovereign_debt_py (now an external dependency)"
 ```
 
 ---
@@ -283,9 +245,9 @@ latest commit, add a manual cache-bust step or use the `--no-cache-dir` flag:
 
 - [ ] Create a new GitHub repo `sovereign_debt_py` (empty, public or private)
 - [ ] Choose Option A (history preserved) or Option B (clean start) above and run the commands
-- [ ] Verify the new repo builds: `pip install -e .` and `pytest -q`
+- [ ] Add a `pyproject.toml` to the new repo (see template above)
+- [ ] Verify the new repo builds: `pip install -e ".[dev]"` and `pytest -q`
 - [ ] Add `.github/workflows/pytest.yml` to the new repo
-- [ ] Declare the dependency in `sovereign_debt_xl/pyproject.toml` (git URL or PyPI name)
-- [ ] Optionally refactor `sovereign_debt_xl` modules to delegate to `sovereign_debt_py`
-- [ ] Remove the `sovereign_debt_py/` subtree from `sovereign_debt_xl`
+- [ ] Declare the dependency in `pyproject.toml` of `sovereign_debt_xl` (git URL or PyPI name)
+- [ ] Remove the `sovereign_debt_py/` directory and its entry from the `pyproject.toml` package discovery in `sovereign_debt_xl`
 - [ ] Confirm `sovereign_debt_xl` CI still passes after the removal
