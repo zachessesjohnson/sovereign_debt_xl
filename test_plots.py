@@ -167,7 +167,7 @@ class TestPlotRollingAvg:
         assert "#SDXL:" in result
 
     def test_window_larger_than_data(self):
-        # Still valid; just all rolling values will be NaN except none
+        # Still valid; just almost all rolling values will be NaN (only one computed at end)
         dates = _make_dates(5)
         values = [1.0, 2.0, 3.0, 4.0, 5.0]
         result = sdxl_plot_rolling_avg(dates, values, window=10)
