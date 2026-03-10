@@ -1,6 +1,6 @@
 import math
 
-from sovereign_debt_xl.indexing import xl_index_to_base, xl_normalize_minmax, xl_rank_pct, xl_zscore
+from sovereign_debt_py.indexing import xl_index_to_base, xl_normalize_minmax, xl_rank_pct, xl_zscore
 
 
 def test_rank_pct_medianish():
