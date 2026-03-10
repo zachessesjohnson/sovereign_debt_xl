@@ -30,6 +30,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
    - [Market Microstructure](#market-microstructure)
    - [IMF Framework](#imf-framework)
    - [Event Studies & Early Warning](#event-studies--early-warning)
+   - [Inline Charts (Plotting)](#inline-charts-plotting)
 5. [Error Handling](#error-handling)
 6. [Running the Tests](#running-the-tests)
 7. [Extracting sovereign\_debt\_py](#extracting-sovereign_debt_py)
@@ -48,6 +49,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
 | scipy | any recent |
 | statsmodels | any recent |
 | scikit-learn | any recent |
+| matplotlib | any recent |
 
 ---
 
@@ -55,7 +57,7 @@ The library covers the full workflow of a sovereign debt analyst: from descripti
 
 ```bash
 # 1. Install Python dependencies
-pip install numpy pandas scipy statsmodels scikit-learn pyxll
+pip install numpy pandas scipy statsmodels scikit-learn matplotlib pyxll
 
 # 2. Install this package
 pip install -e .
@@ -86,6 +88,7 @@ modules =
     sovereign_debt_xl.market_microstructure
     sovereign_debt_xl.imf_framework
     sovereign_debt_xl.event_studies
+    sovereign_debt_xl.plots
 ```
 
 Restart Excel. All `SOV_*` functions will appear in the function wizard.
@@ -1684,6 +1687,96 @@ Kaminsky-Lizondo-Reinhart (1999) signal extraction approach. Issues a signal for
 
 ---
 
+### Inline Charts (Plotting)
+
+These functions render Matplotlib charts to PNG and return them as **PyXLL inline images**, so the chart appears directly inside the Excel cell — no VBA, no popup windows. Results are LRU-cached (up to 128 entries) so recalculation skips re-rendering when inputs haven't changed.
+
+---
+
+#### `SDXL_PLOT_YIELD_CURVE`
+**Python:** `sdxl_plot_yield_curve(tenors, yields, title, x_label, y_label, width_px, height_px, style)`
+
+Plots a yield curve (tenor on x-axis, yield on y-axis) and returns an inline chart image.  
+If all yield values are ≤ 1.0, they are treated as decimal fractions and the y-axis is automatically formatted as a percentage.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `tenors` | float range | — | Tenor values (numeric years or labels) |
+| `yields` | float range | — | Yield values — must be the same length as `tenors` |
+| `title` | string | `"Yield Curve"` | Chart title |
+| `x_label` | string | `"Tenor"` | X-axis label |
+| `y_label` | string | `"Yield"` | Y-axis label (auto-appended with `(%)` when decimal yields detected) |
+| `width_px` | integer | `800` | Output image width in pixels |
+| `height_px` | integer | `450` | Output image height in pixels |
+| `style` | string | `"line"` | `"line"` for a plain line; `"markers"` to add circle markers |
+
+**Returns:** A PyXLL inline image (PNG rendered at `width_px × height_px`).
+
+**Excel example:**
+```
+=SDXL_PLOT_YIELD_CURVE(A2:A10, B2:B10, "UST Curve", "Tenor (yrs)", "Yield", 900, 500)
+```
+Plots the on-the-run US Treasury curve stored in columns A and B.
+
+---
+
+#### `SDXL_PLOT_TIMESERIES`
+**Python:** `sdxl_plot_timeseries(dates, values, title, width_px, height_px)`
+
+Plots a single time series (date on x-axis, value on y-axis) with automatic date-tick formatting and returns an inline chart image.  
+`dates` can be Excel serial date numbers, ISO date strings (`"2024-01-31"`), or Python `datetime.date` objects.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `dates` | date range | — | Date values for the x-axis |
+| `values` | float range | — | Numeric values — must be the same length as `dates` |
+| `title` | string | `"Time Series"` | Chart title |
+| `width_px` | integer | `800` | Output image width in pixels |
+| `height_px` | integer | `450` | Output image height in pixels |
+
+**Returns:** A PyXLL inline image (PNG rendered at `width_px × height_px`).
+
+**Excel example:**
+```
+=SDXL_PLOT_TIMESERIES(A2:A300, B2:B300, "10yr Yield")
+```
+Plots 300 daily observations of the 10-year benchmark yield.
+
+---
+
+#### `SDXL_PLOT_ROLLING_AVG`
+**Python:** `sdxl_plot_rolling_avg(dates, values, window, title, width_px, height_px)`
+
+Plots the original series (light blue, semi-transparent) overlaid with a trailing rolling mean (bold blue) and returns an inline chart image.  
+The rolling mean is `NaN` for the first `window − 1` positions (insufficient history) so the overlay begins only once a full window of data is available.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `dates` | date range | — | Date values for the x-axis |
+| `values` | float range | — | Numeric values — must be the same length as `dates` |
+| `window` | integer | `20` | Number of periods in the rolling window (must be ≥ 1) |
+| `title` | string | `"Rolling Average"` | Chart title |
+| `width_px` | integer | `800` | Output image width in pixels |
+| `height_px` | integer | `450` | Output image height in pixels |
+
+**Returns:** A PyXLL inline image (PNG rendered at `width_px × height_px`).
+
+**Excel example:**
+```
+=SDXL_PLOT_ROLLING_AVG(A2:A300, B2:B300, 20, "Rolling Avg (20)")
+```
+Plots daily CDS spreads with a 20-day rolling mean overlay.
+
+**Error codes returned by all plotting functions:**
+
+| Error | Cause |
+|---|---|
+| `#SDXL: no data` | Input range is empty |
+| `#SDXL: length mismatch (x=N, y=M)` | Date and value ranges have different lengths |
+| `#SDXL: window must be >= 1` | `SDXL_PLOT_ROLLING_AVG` window parameter is zero or negative |
+
+---
+
 ## Error Handling
 
 Every function returns an `#ERR: <message>` string (rather than crashing Excel) when inputs are invalid. Common error messages:
@@ -1713,7 +1806,7 @@ pip install pytest
 python -m pytest
 ```
 
-All 154 tests should pass in under 5 seconds.
+All 176 tests should pass in under 10 seconds.
 
 ---
 
