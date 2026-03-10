@@ -17,4 +17,3 @@ from .market_microstructure import *  # noqa: F401,F403
 from .imf_framework import *  # noqa: F401,F403
 from .event_studies import *  # noqa: F401,F403
 from .plots import *  # noqa: F401,F403
-

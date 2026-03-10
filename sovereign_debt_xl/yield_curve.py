@@ -166,7 +166,7 @@ def carry_rolldown(
     " float[] ois_curve_tenors, float[] ois_curve_rates: float",
     name="SOV_ASW_SPREAD",
 )
-def asw_spread(
+def asm_spread(
     bond_price: float,
     coupon: float,
     maturity: float,
