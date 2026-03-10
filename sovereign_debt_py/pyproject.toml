@@ -3,9 +3,9 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sovereign-debt-xl"
+name = "sovereign-debt-py"
 version = "0.1.0"
-description = "PyXLL-based Excel functions for sovereign debt analysis"
+description = "Pure-Python sovereign debt analysis functions (no Excel/PyXLL dependency)"
 requires-python = ">=3.11"
 dependencies = [
     "numpy",
@@ -21,5 +21,4 @@ dev = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["sovereign_debt_xl*"]
-include = ["sovereign_debt_xl*", "sovereign_debt_py*"]
+include = ["sovereign_debt_py*"]

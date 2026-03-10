@@ -1,6 +1,7 @@
 import math
 
-from sovereign_debt_xl.yield_curve import asw_spread, carry_rolldown, nelson_siegel_fit, zspread
+from sovereign_debt_py.yield_curve import asw_spread, carry_rolldown, nelson_siegel_fit, zspread
+
 
 # ---------------------------------------------------------------------------
 # Nelson-Siegel
